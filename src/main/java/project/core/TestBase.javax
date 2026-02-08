@@ -22,8 +22,9 @@ import java.time.Duration;
  */
 public class TestBase {
     
-    protected WebDriver driver;
-    protected WebDriverWait wait;
+    // protected WebDriver driver;
+    // protected static final ThreadLocal<WebDriver> driver = new ThreadLocal<>();
+    protected WebDriverWait wait = new WebDriverWait(DriverManager.getDriver(), Duration.ofSeconds(WAIT_TIMEOUT_SECONDS));
     private static final String BROWSER_PROPERTY = "browser";
     private static final String DEFAULT_BROWSER = "chrome";
     private static final int WAIT_TIMEOUT_SECONDS = 10;
@@ -35,17 +36,30 @@ public class TestBase {
     protected void initializeDriver() {
         String browser = System.getProperty(BROWSER_PROPERTY, DEFAULT_BROWSER).toLowerCase();
         
+        WebDriver d;
         switch (browser) {
             case "firefox":
-                driver = initializeFirefoxDriver();
+                d = initializeFirefoxDriver();
+                // driver.set(initializeFirefoxDriver());
                 break;
             case "chrome":
             default:
-                driver = initializeChromeDriver();
+                d = initializeChromeDriver();
+                // driver.set(initializeChromeDriver());
                 break;
         }
         
-        wait = new WebDriverWait(driver, Duration.ofSeconds(WAIT_TIMEOUT_SECONDS));
+        // if (driver.get() == null) {
+        //     driver.set(d);
+        // }
+        // wait = new WebDriverWait(driver.get(), Duration.ofSeconds(WAIT_TIMEOUT_SECONDS));
+    }
+
+    public WebDriver getDriver() {
+        if (driver.get() == null) {
+            initializeDriver();
+        }
+        return driver.get();
     }
     
     /**
@@ -83,7 +97,7 @@ public class TestBase {
      */
     protected void quitDriver() {
         if (driver != null) {
-            driver.quit();
+            getDriver().quit();
         }
     }
     
